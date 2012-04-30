@@ -49,12 +49,16 @@ cleanup_s4 <- function(env) {
   classes <- getClasses(env)
   generics <- getGenerics(env)
 
-  lapply(classes, removeClass, where = env)
-  lapply(generics@.Data, removeMethods, where = env)
-  
-  pkg_gen <- generics@.Data[generics@package == "roxygen_test"]
-  lapply(pkg_gen, removeGeneric, where = env)
-  
+  if(length(classes) > 0L){
+    cls_repr <- unlist(lapply(classes, extends, "classRepresentation"))
+    lapply(classes[!cls_repr], removeClass, where = env)
+    lapply(classes[cls_repr], removeClass, where = env)
+  }
+  if(length(generics) > 0L){
+    lapply(generics@.Data, removeMethods, where = env)  
+    pkg_gen <- generics@.Data[generics@package == "roxygen_test"]
+    lapply(pkg_gen, removeGeneric, where = env)
+  }
   invisible(TRUE)
 }
 
